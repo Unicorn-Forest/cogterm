@@ -7,6 +7,8 @@ namespace til
 {
     namespace details
     {
+        using filetime_duration = std::chrono::duration<int64_t, std::ratio<1, 10000000>>;
+
         template<typename... Args>
         class throttled_func_storage
         {
@@ -93,22 +95,18 @@ namespace til
         };
     } // namespace details
 
-    template<typename... Args>
     struct throttle_options {
-        using duration = std::chrono::duration<int64_t, std::ratio<1, 10000000>>;
-        duration delay;
-        bool leading = true;
-        bool trailing = true;
+        details::filetime_duration delay{};
         bool debounce = false;
-
-        throttle_options(duration d) : delay(d) {}
+        bool leading = false;
+        bool trailing = false;
     };
 
     template<typename... Args>
     class throttled_func
     {
     public:
-        using filetime_duration = typename throttle_options<Args...>::duration;
+        using filetime_duration = details::filetime_duration;
         using function = std::function<void(Args...)>;
 
         // Throttles invocations to the given `func` to not occur more often than specified in options.
@@ -120,23 +118,22 @@ namespace til
         // * debounce: If true, resets the timer on each call
         //
         // At least one of leading or trailing must be true.
-        throttled_func(const throttle_options<Args...>& options, function func) :
+        throttled_func(throttle_options opts, function func) :
             _func{ std::move(func) },
-            _timer{ _createTimer() },
-            _leading(options.leading),
-            _trailing(options.trailing),
-            _debounce(options.debounce)
+            _timer{ _create_timer() },
+            _debounce{ opts.debounce },
+            _leading{ opts.leading },
+            _trailing{ opts.trailing },
         {
-            if (!options.leading && !options.trailing) {
-                throw std::invalid_argument("at least one of leading or trailing must be true");
+            if (!_leading && !_trailing) {
+                throw std::invalid_argument("neither leading nor trailing");
             }
 
-            const auto d = -options.delay.count();
+            const auto d = -opts.delay.count();
             if (d >= 0)
             {
                 throw std::invalid_argument("non-positive delay specified");
             }
-
             memcpy(&_delay, &d, sizeof(d));
         }
 
@@ -157,17 +154,7 @@ namespace til
         template<typename... MakeArgs>
         void operator()(MakeArgs&&... args)
         {
-            const auto hadValue = _storage.emplace(std::forward<MakeArgs>(args)...);
-
-            if (_debounce || !hadValue)
-            {
-                SetThreadpoolTimerEx(_timer.get(), &_delay, 0, 0);
-            }
-
-            if (_leading && !hadValue)
-            {
-                _func();
-            }
+            _lead(_storage.emplace(std::forward<MakeArgs>(args)...));
         }
 
         // Modifies the pending arguments for the next function
@@ -198,31 +185,47 @@ namespace til
         static void __stdcall _timer_callback(PTP_CALLBACK_INSTANCE /*instance*/, PVOID context, PTP_TIMER /*timer*/) noexcept
         try
         {
-            const auto self = static_cast<throttled_func*>(context);
-            if (self->_leading && !self->_trailing)
-            {
-                self->_storage.reset();
-            }
-            else if (self->_trailing)
-            {
-                self->_storage.apply(self->_func);
-            }
+            static_cast<throttled_func*>(context)->_trail();
         }
         CATCH_LOG()
 
-        wil::unique_threadpool_timer _createTimer()
+        static wil::unique_threadpool_timer _create_timer()
         {
             wil::unique_threadpool_timer timer{ CreateThreadpoolTimer(&_timer_callback, this, nullptr) };
             THROW_LAST_ERROR_IF(!timer);
             return timer;
         }
 
-        FILETIME _delay;
+        void _lead(bool hadValue)
+        {
+            if (_debounce || !hadValue)
+            {
+                SetThreadpoolTimerEx(_timer.get(), &_delay, 0, 0);
+            }
+            if (_leading && !hadValue)
+            {
+                _storage.apply(_func);
+            }
+        }
+
+        void _trail()
+        {
+            if (_leading && !_trailing)
+            {
+                _storage.reset();
+            }
+            else if (_trailing)
+            {
+                _storage.apply(_func);
+            }
+        }
+
         function _func;
         wil::unique_threadpool_timer _timer;
         details::throttled_func_storage<Args...> _storage;
+        FILETIME _delay;
+        bool _debounce;
         bool _leading;
         bool _trailing;
-        bool _debounce;
     };
 } // namespace til

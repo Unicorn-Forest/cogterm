@@ -339,7 +339,7 @@ namespace winrt::Microsoft::Terminal::Control::implementation
         void _terminalSearchMissingCommand(std::wstring_view missingCommand, const til::CoordType& bufferRow);
         void _terminalWindowSizeChanged(int32_t width, int32_t height);
 
-        safe_void_coroutine _terminalCompletionsChanged(std::wstring_view menuJson, unsigned int replaceLength);
+        void _terminalCompletionsChanged(std::wstring_view menuJson, unsigned int replaceLength);
 #pragma endregion
 
 #pragma region RendererCallbacks

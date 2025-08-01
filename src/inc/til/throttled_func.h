@@ -93,27 +93,45 @@ namespace til
         };
     } // namespace details
 
-    template<bool Debounce, bool Leading, typename... Args>
+    template<typename... Args>
+    struct throttle_options {
+        using duration = std::chrono::duration<int64_t, std::ratio<1, 10000000>>;
+        duration delay;
+        bool leading = true;
+        bool trailing = true;
+        bool debounce = false;
+
+        throttle_options(duration d) : delay(d) {}
+    };
+
+    template<typename... Args>
     class throttled_func
     {
     public:
-        using filetime_duration = std::chrono::duration<int64_t, std::ratio<1, 10000000>>;
+        using filetime_duration = typename throttle_options<Args...>::duration;
         using function = std::function<void(Args...)>;
 
-        // Throttles invocations to the given `func` to not occur more often than `delay`.
+        // Throttles invocations to the given `func` to not occur more often than specified in options.
         //
-        // If this is a:
-        // * throttled_func_leading: `func` will be invoked immediately and
-        //   further invocations prevented until `delay` time has passed.
-        // * throttled_func_trailing: On the first invocation a timer of `delay` time will
-        //   be started. After the timer has expired `func` will be invoked just once.
+        // Options:
+        // * delay: The minimum time between invocations
+        // * leading: If true, `func` will be invoked immediately on first call
+        // * trailing: If true, `func` will be invoked after the delay
+        // * debounce: If true, resets the timer on each call
         //
-        // After `func` was invoked the state is reset and this cycle is repeated again.
-        throttled_func(filetime_duration delay, function func) :
+        // At least one of leading or trailing must be true.
+        throttled_func(const throttle_options<Args...>& options, function func) :
             _func{ std::move(func) },
-            _timer{ _createTimer() }
+            _timer{ _createTimer() },
+            _leading(options.leading),
+            _trailing(options.trailing),
+            _debounce(options.debounce)
         {
-            const auto d = -delay.count();
+            if (!options.leading && !options.trailing) {
+                throw std::invalid_argument("at least one of leading or trailing must be true");
+            }
+
+            const auto d = -options.delay.count();
             if (d >= 0)
             {
                 throw std::invalid_argument("non-positive delay specified");
@@ -141,24 +159,14 @@ namespace til
         {
             const auto hadValue = _storage.emplace(std::forward<MakeArgs>(args)...);
 
-            if constexpr (Debounce)
+            if (_debounce || !hadValue)
             {
                 SetThreadpoolTimerEx(_timer.get(), &_delay, 0, 0);
             }
-            else
-            {
-                if (!hadValue)
-                {
-                    SetThreadpoolTimerEx(_timer.get(), &_delay, 0, 0);
-                }
-            }
 
-            if constexpr (Leading)
+            if (_leading && !hadValue)
             {
-                if (!hadValue)
-                {
-                    _func();
-                }
+                _func();
             }
         }
 
@@ -191,11 +199,11 @@ namespace til
         try
         {
             const auto self = static_cast<throttled_func*>(context);
-            if constexpr (Leading)
+            if (self->_leading && !self->_trailing)
             {
                 self->_storage.reset();
             }
-            else
+            else if (self->_trailing)
             {
                 self->_storage.apply(self->_func);
             }
@@ -213,13 +221,8 @@ namespace til
         function _func;
         wil::unique_threadpool_timer _timer;
         details::throttled_func_storage<Args...> _storage;
+        bool _leading;
+        bool _trailing;
+        bool _debounce;
     };
-
-    template<typename... Args>
-    using throttled_func_trailing = throttled_func<false, false, Args...>;
-    using throttled_func_leading = throttled_func<false, true>;
-
-    template<typename... Args>
-    using debounced_func_trailing = throttled_func<true, false, Args...>;
-    using debounced_func_leading = throttled_func<true, true>;
 } // namespace til

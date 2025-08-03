@@ -1,6 +1,6 @@
 name: Clone aichat Repos
 permissions:
-  contents: read
+  contents: write
 
 on:
   workflow_dispatch:
@@ -16,11 +16,30 @@ jobs:
     - name: Ensure git is installed
       run: sudo apt-get update && sudo apt-get install -y git
 
+    - name: Configure git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
     - name: Run clone-repos
       run: |
         git clone --progress https://github.com/sigoden/aichat.git
         git clone --progress https://github.com/sigoden/argc.git
         git clone --progress https://github.com/sigoden/llm-functions.git
         git clone --progress https://github.com/sigoden/clii.git
+
+    - name: Add cloned repos to git
+      run: |
+        git add aichat/
+        git add argc/
+        git add llm-functions/
+        git add clii/
+
+    - name: Commit changes
+      run: |
+        git commit -m "Add cloned aichat repositories" || echo "No changes to commit"
+
+    - name: Push changes
+      run: git push
 
 

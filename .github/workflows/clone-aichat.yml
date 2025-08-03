@@ -1,26 +1,93 @@
 name: Clone aichat Repos
 permissions:
-  contents: read
+  contents: write
 
 on:
   workflow_dispatch:
 
 jobs:
-  clone-gnu-hurd:
+  clone-aichat:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Ensure git is installed
       run: sudo apt-get update && sudo apt-get install -y git
 
-    - name: Run clone-repos
+    - name: Configure git
       run: |
-        git clone --progress https://github.com/sigoden/aichat.git
-        git clone --progress https://github.com/sigoden/argc.git
-        git clone --progress https://github.com/sigoden/llm-functions.git
-        git clone --progress https://github.com/sigoden/clii.git
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Clone repositories
+      run: |
+        echo "Cloning aichat..."
+        git clone --progress https://github.com/sigoden/aichat.git || echo "Failed to clone aichat"
+        
+        echo "Cloning argc..."
+        git clone --progress https://github.com/sigoden/argc.git || echo "Failed to clone argc"
+        
+        echo "Cloning llm-functions..."
+        git clone --progress https://github.com/sigoden/llm-functions.git || echo "Failed to clone llm-functions"
+        
+        echo "Cloning clii..."
+        git clone --progress https://github.com/sigoden/clii.git || echo "Failed to clone clii"
+
+    - name: List cloned directories
+      run: ls -la
+
+    - name: Add cloned repos to git
+      run: |
+        if [ -d "aichat" ]; then
+          echo "Adding aichat to git..."
+          git add aichat/
+        else
+          echo "aichat directory not found"
+        fi
+        
+        if [ -d "argc" ]; then
+          echo "Adding argc to git..."
+          git add argc/
+        else
+          echo "argc directory not found"
+        fi
+        
+        if [ -d "llm-functions" ]; then
+          echo "Adding llm-functions to git..."
+          git add llm-functions/
+        else
+          echo "llm-functions directory not found"
+        fi
+        
+        if [ -d "clii" ]; then
+          echo "Adding clii to git..."
+          git add clii/
+        else
+          echo "clii directory not found"
+        fi
+
+    - name: Check git status
+      run: git status
+
+    - name: Commit changes
+      run: |
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Add cloned aichat repositories"
+        fi
+
+    - name: Push changes
+      run: |
+        if git log --oneline -1 | grep -q "Add cloned aichat repositories"; then
+          echo "Pushing changes..."
+          git push
+        else
+          echo "No new commits to push"
+        fi
 
 

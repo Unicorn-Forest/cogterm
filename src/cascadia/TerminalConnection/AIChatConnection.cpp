@@ -8,13 +8,15 @@ using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Foundation::Collections;
 using namespace winrt::Microsoft::Terminal::TerminalConnection;
 
+namespace AI = Microsoft::Terminal::AI;
+
 static constexpr winrt::guid AIChatConnectionType = { 0x8f1e1e1a, 0x2b3c, 0x4d5e, { 0x9f, 0x8a, 0x1b, 0x2c, 0x3d, 0x4e, 0x5f, 0x6a } };
 
 namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
 {
     AIChatConnection::AIChatConnection()
     {
-        _aichatEngine = std::make_unique<Microsoft::Terminal::AI::AIChatEngine>();
+        _aichatEngine = std::make_unique<AI::AIChatEngine>();
         
         // Set up event handlers for AI chat engine
         _aichatEngine->ResponseReceived({ this, &AIChatConnection::_handleAIResponse });

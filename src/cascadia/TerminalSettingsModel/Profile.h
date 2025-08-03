@@ -52,6 +52,7 @@ Author(s):
 #include <DefaultSettings.h>
 #include "AppearanceConfig.h"
 #include "FontConfig.h"
+#include "AISettings.h"
 
 // fwdecl unittest classes
 namespace SettingsModelUnitTests
@@ -101,6 +102,7 @@ namespace winrt::Microsoft::Terminal::Settings::Model::implementation
 
         Model::IAppearanceConfig DefaultAppearance();
         Model::FontConfig FontInfo();
+        Model::AISettings AISettings() const;
 
         static std::wstring NormalizeCommandLine(LPCWSTR commandLine);
 
@@ -144,6 +146,7 @@ namespace winrt::Microsoft::Terminal::Settings::Model::implementation
     private:
         Model::IAppearanceConfig _DefaultAppearance{ winrt::make<AppearanceConfig>(weak_ref<Model::Profile>(*this)) };
         Model::FontConfig _FontInfo{ winrt::make<FontConfig>(weak_ref<Model::Profile>(*this)) };
+        Model::AISettings _aiSettings{ nullptr }; // AI settings support
 
         std::optional<hstring> _Icon{ std::nullopt };
         std::optional<winrt::hstring> _evaluatedIcon{ std::nullopt };

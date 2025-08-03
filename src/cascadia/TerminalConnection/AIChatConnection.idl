@@ -1,0 +1,21 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
+import "ITerminalConnection.idl";
+
+namespace Microsoft.Terminal.TerminalConnection
+{
+    [default_interface] runtimeclass AIChatConnection : ITerminalConnection
+    {
+        static Guid ConnectionType { get; };
+
+        AIChatConnection();
+        
+        // AI Chat specific properties
+        String Role;
+        String SessionId;
+        String Provider;
+        String Model;
+        String APIKey;
+    };
+}

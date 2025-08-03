@@ -39,7 +39,8 @@ static constexpr std::string_view LegacyShowMarksKey{ "experimental.showMarksOnS
 static constexpr std::string_view LegacyRightClickContextMenuKey{ "experimental.rightClickContextMenu" };
 
 Profile::Profile(guid guid) noexcept :
-    _Guid(guid)
+    _Guid(guid),
+    _aiSettings{ nullptr } // New AI settings
 {
 }
 
@@ -285,6 +286,11 @@ winrt::Microsoft::Terminal::Settings::Model::IAppearanceConfig Profile::DefaultA
 winrt::Microsoft::Terminal::Settings::Model::FontConfig Profile::FontInfo()
 {
     return _FontInfo;
+}
+
+winrt::Microsoft::Terminal::Settings::Model::AISettings Profile::AISettings() const
+{
+    return _aiSettings;
 }
 
 // Method Description:

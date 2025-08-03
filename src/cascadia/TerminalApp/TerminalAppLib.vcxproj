@@ -423,6 +423,9 @@
       <Private>true</Private>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="$(OpenConsoleDir)src\cascadia\TerminalAI\TerminalAI.vcxproj">
+      <Project>{CA5CAD1A-224A-4171-B13A-F16E576FDD13}</Project>
+    </ProjectReference>
 
   </ItemGroup>
   <PropertyGroup>

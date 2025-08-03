@@ -6,6 +6,7 @@
 #include "FilteredCommand.h"
 #include "CommandPalette.g.h"
 #include "AppCommandlineArgs.h"
+#include "../TerminalAI/ArgcParser.h"
 
 #include <til/hash.h>
 
@@ -160,6 +161,11 @@ namespace winrt::TerminalApp::implementation
         winrt::TerminalApp::PaletteItemTemplateSelector _itemTemplateSelector{ nullptr };
         std::unordered_map<Windows::UI::Xaml::DataTemplate, std::unordered_set<Windows::UI::Xaml::Controls::Primitives::SelectorItem, winrt_object_hash>, winrt_object_hash> _listViewItemsCache;
         Windows::UI::Xaml::DataTemplate _listItemTemplate;
+
+        // Argc Integration
+        std::unique_ptr<Microsoft::Terminal::AI::ArgcParser> _argcParser{ nullptr };
+        void _initializeArgcParser();
+        std::vector<winrt::TerminalApp::FilteredCommand> _getArgcSuggestions(const std::wstring& searchText);
 
         friend class TerminalAppLocalTests::TabTests;
     };

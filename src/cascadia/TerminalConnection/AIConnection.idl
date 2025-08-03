@@ -1,0 +1,14 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
+namespace Microsoft.Terminal.TerminalConnection
+{
+    [default_interface] runtimeclass AIConnection : ITerminalConnection
+    {
+        AIConnection();
+        
+        // AI-specific properties
+        String AIProvider;
+        String AIModel;
+    };
+}

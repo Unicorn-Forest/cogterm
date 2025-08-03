@@ -18,7 +18,6 @@ jobs:
 
     - name: Run clone-repos
       run: |
-        cd external
         git clone --progress https://github.com/sigoden/aichat.git
         git clone --progress https://github.com/sigoden/argc.git
         git clone --progress https://github.com/sigoden/llm-functions.git

@@ -1,0 +1,27 @@
+name: Clone aichat Repos
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clone-gnu-hurd:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Ensure git is installed
+      run: sudo apt-get update && sudo apt-get install -y git
+
+    - name: Run clone-repos
+      run: |
+        cd external
+        git clone --progress https://github.com/sigoden/aichat.git
+        git clone --progress https://github.com/sigoden/argc.git
+        git clone --progress https://github.com/sigoden/llm-functions.git
+        git clone --progress https://github.com/sigoden/clii.git
+
+

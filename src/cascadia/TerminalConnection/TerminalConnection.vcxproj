@@ -33,6 +33,9 @@
     <ClInclude Include="EchoConnection.h">
       <DependentUpon>EchoConnection.idl</DependentUpon>
     </ClInclude>
+    <ClInclude Include="AIConnection.h">
+      <DependentUpon>AIConnection.idl</DependentUpon>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CTerminalHandoff.cpp" />
@@ -52,6 +55,9 @@
     <ClCompile Include="ConptyConnection.cpp">
       <DependentUpon>ConptyConnection.idl</DependentUpon>
     </ClCompile>
+    <ClCompile Include="AIConnection.cpp">
+      <DependentUpon>AIConnection.idl</DependentUpon>
+    </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -60,6 +66,7 @@
     <Midl Include="ConptyConnection.idl" />
     <Midl Include="EchoConnection.idl" />
     <Midl Include="AzureConnection.idl" />
+    <Midl Include="AIConnection.idl" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="Resources\en-US\Resources.resw">
@@ -80,6 +87,9 @@
     <ProjectReference Include="$(OpenConsoleDir)src\cascadia\WinRTUtils\WinRTUtils.vcxproj">
       <Project>{CA5CAD1A-039A-4929-BA2A-8BEB2E4106FE}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="$(OpenConsoleDir)src\cascadia\TerminalAI\TerminalAI.vcxproj">
+      <Project>{CA5CAD1A-224A-4171-B13A-F16E576FDD13}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\winconpty\lib\winconptylib.vcxproj">
       <Project>{58a03bb2-df5a-4b66-91a0-7ef3ba01269a}</Project>

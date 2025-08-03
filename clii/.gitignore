@@ -1,0 +1,8 @@
+node_modules
+dist
+*.log
+
+.parcel-cache
+yarn.lock
+.vscode
+tmp

@@ -12,6 +12,7 @@
 
 #include "ControlInteractivity.h"
 #include "ControlSettings.h"
+#include "../TerminalAI/ArgcParser.h"
 
 namespace Microsoft::Console::VirtualTerminal
 {
@@ -285,6 +286,9 @@ namespace winrt::Microsoft::Terminal::Control::implementation
         til::CoordType _quickFixBufferPos{};
 
         std::shared_ptr<ThrottledFuncLeading> _playWarningBell;
+        
+        // Argc Integration
+        std::unique_ptr<Microsoft::Terminal::AI::ArgcParser> _argcParser{ nullptr };
 
         struct ScrollBarUpdate
         {
@@ -366,6 +370,11 @@ namespace winrt::Microsoft::Terminal::Control::implementation
         void _KeyDownHandler(const Windows::Foundation::IInspectable& sender, const Windows::UI::Xaml::Input::KeyRoutedEventArgs& e);
         void _KeyUpHandler(const Windows::Foundation::IInspectable& sender, const Windows::UI::Xaml::Input::KeyRoutedEventArgs& e);
         void _CharacterHandler(const Windows::Foundation::IInspectable& sender, const Windows::UI::Xaml::Input::CharacterReceivedRoutedEventArgs& e);
+        
+        // Argc Integration for autocompletion
+        void _HandleArgcAutocompletion();
+        std::wstring _GetCurrentCommandLine();
+        void _ShowArgcCompletions(const std::vector<std::wstring>& completions);
         void _PointerPressedHandler(const Windows::Foundation::IInspectable& sender, const Windows::UI::Xaml::Input::PointerRoutedEventArgs& e);
         void _PointerMovedHandler(const Windows::Foundation::IInspectable& sender, const Windows::UI::Xaml::Input::PointerRoutedEventArgs& e);
         void _PointerReleasedHandler(const Windows::Foundation::IInspectable& sender, const Windows::UI::Xaml::Input::PointerRoutedEventArgs& e);

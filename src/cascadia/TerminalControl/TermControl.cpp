@@ -1619,6 +1619,13 @@ namespace winrt::Microsoft::Terminal::Control::implementation
             return true;
         }
 
+        // Handle Tab key for Argc autocompletion
+        if (vkey == VK_TAB && keyDown && !WI_IsFlagSet(modifiers, ControlKeyStates::CtrlPressed))
+        {
+            _HandleArgcAutocompletion();
+            return true;
+        }
+
         // Short-circuit isReadOnly check to avoid warning dialog
         if (_core.IsInReadOnlyMode())
         {
@@ -4216,6 +4223,118 @@ namespace winrt::Microsoft::Terminal::Control::implementation
                 _cursorTimer.Stop();
             }
             _core.CursorOn(focused);
+        }
+    }
+
+    // Method Description:
+    // - Handle Argc autocompletion when Tab is pressed
+    // - Gets the current command line and shows relevant completions
+    void TermControl::_HandleArgcAutocompletion()
+    {
+        if (!_argcParser)
+        {
+            // Initialize ArgcParser on first use
+            try
+            {
+                _argcParser = Microsoft::Terminal::AI::CreateArgcParser();
+            }
+            catch (...)
+            {
+                // Failed to create parser, autocompletion unavailable
+                return;
+            }
+        }
+
+        if (!_argcParser)
+        {
+            return;
+        }
+
+        try
+        {
+            auto currentLine = _GetCurrentCommandLine();
+            if (currentLine.empty())
+            {
+                return;
+            }
+
+            auto completions = _argcParser->GetCompletions(currentLine);
+            if (!completions.empty())
+            {
+                std::vector<std::wstring> completionStrings;
+                for (const auto& completion : completions)
+                {
+                    completionStrings.push_back(completion.completion);
+                }
+                _ShowArgcCompletions(completionStrings);
+            }
+        }
+        catch (...)
+        {
+            // Error during autocompletion, ignore
+        }
+    }
+
+    // Method Description:
+    // - Get the current command line text from the terminal
+    // Return Value:
+    // - The current line as a wstring
+    std::wstring TermControl::_GetCurrentCommandLine()
+    {
+        try
+        {
+            // Get the current cursor position and buffer
+            const auto cursorPos = _core.CursorPosition();
+            const auto& buffer = _core.GetTextBuffer();
+            
+            // Get the current line from the buffer
+            const auto currentRow = cursorPos.y;
+            if (currentRow >= 0 && currentRow < buffer.GetSize().Height())
+            {
+                const auto& line = buffer.GetRowByOffset(currentRow);
+                auto lineText = line.GetText();
+                
+                // Trim trailing whitespace and return
+                auto endPos = lineText.find_last_not_of(L" \t");
+                if (endPos != std::wstring::npos)
+                {
+                    return lineText.substr(0, endPos + 1);
+                }
+                return lineText;
+            }
+        }
+        catch (...)
+        {
+            // Error getting current line
+        }
+        
+        return {};
+    }
+
+    // Method Description:
+    // - Show Argc completions to the user
+    // Arguments:
+    // - completions: Vector of completion strings to display
+    void TermControl::_ShowArgcCompletions(const std::vector<std::wstring>& completions)
+    {
+        if (completions.empty())
+        {
+            return;
+        }
+
+        try
+        {
+            // For now, just insert the first completion
+            // In a full implementation, this would show a completion popup
+            // or cycle through completions
+            auto firstCompletion = completions[0];
+            
+            // Send the completion text to the terminal
+            _core.SendInput(firstCompletion);
+        }
+        catch (...)
+        {
+            // Error showing completions
         }
     }
 }

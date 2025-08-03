@@ -33,6 +33,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="AIEngine.h" />
+    <ClInclude Include="AIChatEngine.h" />
   </ItemGroup>
   
   <ItemGroup>
@@ -40,6 +41,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="AIEngine.cpp" />
+    <ClCompile Include="AIChatEngine.cpp" />
   </ItemGroup>
   
   <ItemGroup>

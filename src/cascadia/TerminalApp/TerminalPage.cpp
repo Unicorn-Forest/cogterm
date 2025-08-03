@@ -1323,6 +1323,29 @@ namespace winrt::TerminalApp::implementation
                                                                             winrt::guid(),
                                                                             profile.Guid());
         }
+        else if (connectionType == TerminalConnection::AIChatConnection::ConnectionType())
+        {
+            connection = TerminalConnection::AIChatConnection{};
+            
+            // Create settings for AI Chat connection
+            valueSet.Insert(L"role", winrt::box_value(L"user"));
+            valueSet.Insert(L"provider", winrt::box_value(L"openai"));
+            valueSet.Insert(L"model", winrt::box_value(L"gpt-4"));
+            valueSet.Insert(L"initialRows", winrt::box_value(settings.InitialRows()));
+            valueSet.Insert(L"initialCols", winrt::box_value(settings.InitialCols()));
+            
+            // If profile has AI settings, use them
+            auto aiSettings = profile.AISettings();
+            if (aiSettings != nullptr)
+            {
+                valueSet.Insert(L"provider", winrt::box_value(aiSettings.AIProvider()));
+                valueSet.Insert(L"model", winrt::box_value(aiSettings.DefaultModel()));
+                if (!aiSettings.APIKey().empty())
+                {
+                    valueSet.Insert(L"apiKey", winrt::box_value(aiSettings.APIKey()));
+                }
+            }
+        }
 
         else
         {

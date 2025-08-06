@@ -36,6 +36,8 @@
     <ClInclude Include="AIEngine.h" />
     <ClInclude Include="AIChatEngine.h" />
     <ClInclude Include="ArgcParser.h" />
+    <ClInclude Include="FunctionCallingEngine.h" />
+    <ClInclude Include="AIAgent.h" />
   </ItemGroup>
   
   <ItemGroup>
@@ -45,6 +47,8 @@
     <ClCompile Include="AIEngine.cpp" />
     <ClCompile Include="AIChatEngine.cpp" />
     <ClCompile Include="ArgcParser.cpp" />
+    <ClCompile Include="FunctionCallingEngine.cpp" />
+    <ClCompile Include="AIAgent.cpp" />
   </ItemGroup>
   
   <ItemGroup>

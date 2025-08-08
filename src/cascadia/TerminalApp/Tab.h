@@ -13,6 +13,12 @@ namespace TerminalAppLocalTests
     class TabTests;
 };
 
+// Forward declarations for AI integration
+namespace Microsoft::Terminal::AI
+{
+    class AIAgent;
+}
+
 namespace winrt::TerminalApp::implementation
 {
     struct Tab : TabT<Tab>
@@ -260,6 +266,11 @@ namespace winrt::TerminalApp::implementation
         void _findClicked(const winrt::Windows::Foundation::IInspectable& sender, const winrt::Windows::UI::Xaml::RoutedEventArgs& e);
 
         void _bubbleRestartTerminalRequested(TerminalApp::TerminalPaneContent sender, const winrt::Windows::Foundation::IInspectable& args);
+
+        // AI Agent support
+        std::unique_ptr<Microsoft::Terminal::AI::AIAgent> _agent;
+        void _initializeAgentTab();
+        void _writeToTerminal(const winrt::hstring& text);
 
         friend class ::TerminalAppLocalTests::TabTests;
     };

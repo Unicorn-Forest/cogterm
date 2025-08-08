@@ -39,6 +39,9 @@
     <ClInclude Include="AIChatConnection.h">
       <DependentUpon>AIChatConnection.idl</DependentUpon>
     </ClInclude>
+    <ClInclude Include="CliiConnection.h">
+      <DependentUpon>CliiConnection.idl</DependentUpon>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CTerminalHandoff.cpp" />
@@ -64,6 +67,9 @@
     <ClCompile Include="AIChatConnection.cpp">
       <DependentUpon>AIChatConnection.idl</DependentUpon>
     </ClCompile>
+    <ClCompile Include="CliiConnection.cpp">
+      <DependentUpon>CliiConnection.idl</DependentUpon>
+    </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +80,7 @@
     <Midl Include="AzureConnection.idl" />
     <Midl Include="AIConnection.idl" />
     <Midl Include="AIChatConnection.idl" />
+    <Midl Include="CliiConnection.idl" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="Resources\en-US\Resources.resw">

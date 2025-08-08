@@ -2694,8 +2694,8 @@ namespace winrt::TerminalApp::implementation
             agentPath = profile.StartingDirectory(); // Use starting directory for agent config path
         }
         // Fallback: check profile name for agent indication
-        else if (agentName.find(L"Agent") != std::wstring::npos || 
-                 agentName.find(L"AI") != std::wstring::npos)
+        else if (std::wstring_view(agentName).find(L"Agent") != std::wstring::npos || 
+                 std::wstring_view(agentName).find(L"AI") != std::wstring::npos)
         {
             isAgentProfile = true;
             agentPath = L"./agents/default.json"; // Default agent path

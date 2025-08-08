@@ -8,20 +8,6 @@
 
 namespace winrt::TerminalSettingsEditor::implementation
 {
-    struct AISettingsPageViewModel : public ViewModelHelpers::ViewModelHelper<AISettingsPageViewModel>
-    {
-    public:
-        // Constructor
-        AISettingsPageViewModel();
-
-        // Property getters/setters
-        GETSET_BINDABLE_ENUM_SETTING(bool, EnableAIChat, false);
-        GETSET_BINDABLE_ENUM_SETTING(bool, EnableFunctionCalling, false);
-        GETSET_BINDABLE_ENUM_SETTING(winrt::hstring, AIProvider, L"");
-        GETSET_BINDABLE_ENUM_SETTING(winrt::hstring, APIKey, L"");
-        GETSET_BINDABLE_ENUM_SETTING(winrt::hstring, DefaultModel, L"");
-    };
-
     struct AISettingsPage : AISettingsPageT<AISettingsPage>
     {
     public:
@@ -31,11 +17,10 @@ namespace winrt::TerminalSettingsEditor::implementation
                           Windows::UI::Xaml::Controls::ScrollViewerViewChangingEventArgs const& e);
 
         WINRT_CALLBACK(PropertyChanged, Windows::UI::Xaml::Data::PropertyChangedEventHandler);
-        WINRT_PROPERTY(TerminalSettingsEditor::AISettingsPageViewModel, ViewModel, nullptr);
+        WINRT_PROPERTY(Microsoft::Terminal::Settings::Model::AISettings, AISettings, nullptr);
 
     private:
         void _UpdateWithSettings();
-
     };
 }
 

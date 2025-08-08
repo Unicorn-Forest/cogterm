@@ -2677,20 +2677,42 @@ namespace winrt::TerminalApp::implementation
             return;
         }
 
-        // Note: This assumes ConnectionType::AIAgent and AgentName/AgentPath methods exist
-        // For minimal changes, we'll use try-catch to avoid compilation errors if they don't exist yet
-        try
+        // Check for AI agent connections
+        bool isAgentProfile = false;
+        winrt::hstring agentName = profile.Name();
+        winrt::hstring agentPath = L"";
+
+        // Check if this is an AI agent connection type
+        const auto connectionType = profile.ConnectionType();
+        
+        // AIChatConnection GUID: {8f1e1e1a-2b3c-4d5e-9f8a-1b2c3d4e5f6a}
+        static const winrt::guid AIChatConnectionType{ 0x8f1e1e1a, 0x2b3c, 0x4d5e, { 0x9f, 0x8a, 0x1b, 0x2c, 0x3d, 0x4e, 0x5f, 0x6a } };
+        
+        if (connectionType == AIChatConnectionType)
         {
-            // Check if this is an AI agent profile (this would require ConnectionType::AIAgent to be defined)
-            // For now, we'll implement a basic check that can be extended
-            
-            // Since the exact profile interface isn't defined yet, we'll create a placeholder agent
-            // This would be replaced with actual profile checking when ConnectionType::AIAgent is implemented
-            if (profile.Name() == L"AI Agent" || profile.Name().find(L"Agent") != std::wstring::npos)
+            isAgentProfile = true;
+            agentPath = profile.StartingDirectory(); // Use starting directory for agent config path
+        }
+        // Fallback: check profile name for agent indication
+        else if (agentName.find(L"Agent") != std::wstring::npos || 
+                 agentName.find(L"AI") != std::wstring::npos)
+        {
+            isAgentProfile = true;
+            agentPath = L"./agents/default.json"; // Default agent path
+        }
+
+        if (isAgentProfile)
+        {
+            try
             {
-                _agent = std::make_unique<Microsoft::Terminal::AI::AIAgent>(profile.Name());
-                // Default agent path - would be replaced with _profile.AgentPath() when available
-                _agent->LoadAgent(L"./agents/default.json");
+                _agent = std::make_unique<Microsoft::Terminal::AI::AIAgent>(agentName);
+                
+                // Use specified agent path or default
+                if (agentPath.empty())
+                {
+                    agentPath = L"./agents/default.json";
+                }
+                _agent->LoadAgent(agentPath);
                 
                 // Set up agent event handlers
                 _agent->ResponseReceived([this](auto&&, auto&& response) {
@@ -2700,32 +2722,39 @@ namespace winrt::TerminalApp::implementation
                 _agent->ErrorOccurred([this](auto&&, auto&& error) {
                     _writeToTerminal(L"[Agent Error]: " + error);
                 });
+                
+                // Write initialization message
+                _writeToTerminal(L"AI Agent '" + agentName + L"' initialized successfully.");
             }
-        }
-        catch (...)
-        {
-            // Silently ignore errors for now - this allows the code to compile
-            // even if the full agent infrastructure isn't ready yet
+            catch (const std::exception& ex)
+            {
+                // Log error but don't fail the tab creation
+                _writeToTerminal(L"[Agent Init Error]: Failed to initialize AI agent - " + 
+                               winrt::to_hstring(ex.what()));
+            }
+            catch (...)
+            {
+                _writeToTerminal(L"[Agent Init Error]: Unknown error initializing AI agent");
+            }
         }
     }
 
     void Tab::_writeToTerminal(const winrt::hstring& text)
     {
-        // Write text to the active terminal control
+        // Write text to the active terminal control as output (not input)
         auto control = GetActiveTerminalControl();
         if (control)
         {
-            // Convert hstring to string and send as input
+            // Write directly to terminal output instead of sending as input
+            // This ensures the text appears as output from the agent, not as user input
             std::wstring wstr{ text };
-            wstr += L"\r\n"; // Add newline
+            if (!wstr.empty() && wstr.back() != L'\n')
+            {
+                wstr += L"\r\n"; // Add newline if not present
+            }
             
-            // Create a vector of bytes from the wide string
-            auto utf8String = winrt::to_string(wstr);
-            std::vector<uint8_t> data(utf8String.begin(), utf8String.end());
-            
-            // This is a simplified approach - in practice, we'd want to write directly
-            // to the terminal buffer rather than sending as input
-            control.SendInput(winrt::array_view<const uint8_t>(data));
+            // Use RawWriteString to write directly to terminal output
+            control.RawWriteString(wstr);
         }
     }
 }

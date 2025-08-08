@@ -49,6 +49,7 @@
     <ClCompile Include="ArgcParser.cpp" />
     <ClCompile Include="FunctionCallingEngine.cpp" />
     <ClCompile Include="AIAgent.cpp" />
+    <ClCompile Include="FunctionCallingEngineTests.cpp" />
   </ItemGroup>
   
   <ItemGroup>

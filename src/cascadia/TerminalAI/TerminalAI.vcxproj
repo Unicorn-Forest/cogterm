@@ -38,6 +38,7 @@
     <ClInclude Include="ArgcParser.h" />
     <ClInclude Include="FunctionCallingEngine.h" />
     <ClInclude Include="AIAgent.h" />
+    <ClInclude Include="JavaScriptRuntime.h" />
   </ItemGroup>
   
   <ItemGroup>
@@ -49,6 +50,7 @@
     <ClCompile Include="ArgcParser.cpp" />
     <ClCompile Include="FunctionCallingEngine.cpp" />
     <ClCompile Include="AIAgent.cpp" />
+    <ClCompile Include="JavaScriptRuntime.cpp" />
     <ClCompile Include="FunctionCallingEngineTests.cpp" />
   </ItemGroup>
   

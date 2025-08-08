@@ -117,52 +117,69 @@ namespace Microsoft::Terminal::AI
         // Clear existing functions
         _functions.clear();
         
-        // Simple regex-based parsing for function definitions
-        // This is a basic implementation - a real parser would be more robust
         std::wstring content{scriptContent};
-        std::wregex functionRegex(LR"(function\s+(\w+)\s*\([^)]*\)\s*\{)");
-        std::wregex commentRegex(LR"(/\*\*(.*?)\*/)");
         
-        std::wsregex_iterator iter(content.begin(), content.end(), functionRegex);
-        std::wsregex_iterator end;
+        // Find all JSDoc comments and their positions
+        std::wregex commentRegex(LR"(/\*\*[\s\S]*?\*/)");
+        std::wsregex_iterator commentIter(content.begin(), content.end(), commentRegex);
+        std::wsregex_iterator commentEnd;
         
-        for (; iter != end; ++iter)
+        std::map<size_t, std::wstring> comments;
+        for (; commentIter != commentEnd; ++commentIter)
         {
-            const std::wsmatch& match = *iter;
+            comments[commentIter->position() + commentIter->length()] = commentIter->str();
+        }
+        
+        // Find all function definitions
+        std::wregex functionRegex(LR"(function\s+(\w+)\s*\([^)]*\)\s*\{)");
+        std::wsregex_iterator funcIter(content.begin(), content.end(), functionRegex);
+        std::wsregex_iterator funcEnd;
+        
+        for (; funcIter != funcEnd; ++funcIter)
+        {
+            const std::wsmatch& match = *funcIter;
             std::wstring functionName = match[1].str();
             
             CliiFunction func;
             func.name = functionName;
             func.description = L"JavaScript function: " + functionName;
             
-            // Look for JSDoc comments before the function
-            auto functionPos = match.position();
-            if (functionPos > 0)
+            // Find the closest comment before this function
+            auto functionPos = funcIter->position();
+            std::wstring closestComment;
+            size_t closestPos = 0;
+            
+            for (const auto& commentPair : comments)
             {
-                std::wstring beforeFunction = content.substr(0, functionPos);
-                std::wsregex_iterator commentIter(beforeFunction.begin(), beforeFunction.end(), commentRegex);
-                std::wsregex_iterator commentEnd;
-                
-                // Get the last comment before the function (closest one)
-                std::wstring lastComment;
-                for (; commentIter != commentEnd; ++commentIter)
+                if (commentPair.first <= functionPos && commentPair.first > closestPos)
                 {
-                    lastComment = (*commentIter)[1].str();
+                    closestPos = commentPair.first;
+                    closestComment = commentPair.second;
+                }
+            }
+            
+            if (!closestComment.empty())
+            {
+                // Extract description and parameters from JSDoc
+                std::wregex descRegex(LR"(\*\s*([^@\*]+))");
+                std::wsmatch descMatch;
+                if (std::regex_search(closestComment, descMatch, descRegex))
+                {
+                    func.description = descMatch[1].str();
+                    // Trim whitespace
+                    func.description.erase(0, func.description.find_first_not_of(L" \t\r\n"));
+                    func.description.erase(func.description.find_last_not_of(L" \t\r\n") + 1);
                 }
                 
-                if (!lastComment.empty())
+                // Parse parameters from JSDoc
+                std::wregex paramRegex(LR"(@param\s+\{([^}]+)\}\s+(\w+)\s+([^\r\n]*))");
+                std::wsregex_iterator paramIter(closestComment.begin(), closestComment.end(), paramRegex);
+                std::wsregex_iterator paramEnd;
+                
+                for (; paramIter != paramEnd; ++paramIter)
                 {
-                    func.description = lastComment;
-                    // Parse parameters from JSDoc (simplified)
-                    std::wregex paramRegex(LR"(@param\s+\{([^}]+)\}\s+(\w+)\s+([^\n]*))");
-                    std::wsregex_iterator paramIter(lastComment.begin(), lastComment.end(), paramRegex);
-                    std::wsregex_iterator paramEnd;
-                    
-                    for (; paramIter != paramEnd; ++paramIter)
-                    {
-                        const std::wsmatch& paramMatch = *paramIter;
-                        func.parameters[paramMatch[2].str()] = paramMatch[3].str();
-                    }
+                    const std::wsmatch& paramMatch = *paramIter;
+                    func.parameters[paramMatch[2].str()] = paramMatch[3].str();
                 }
             }
             

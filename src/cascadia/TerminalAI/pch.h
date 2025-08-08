@@ -17,8 +17,16 @@
 #include <memory>
 #include <map>
 #include <functional>
+#include <filesystem>
 
 // WIL
 #include <wil/common.h>
 #include <wil/result.h>
 #include <wil/wistd_memory.h>
+
+// JSON
+#include <json/json.h>
+
+// Manually include til after we include Windows.Foundation to give it winrt superpowers
+#include "til.h"
+#include <til/io.h>

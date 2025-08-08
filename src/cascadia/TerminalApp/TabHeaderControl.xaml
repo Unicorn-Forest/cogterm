@@ -56,6 +56,12 @@
                   FontSize="12"
                   Glyph="&#xEC05;"
                   Visibility="{x:Bind TabStatus.IsInputBroadcastActive, Mode=OneWay}" />
+        <FontIcon x:Name="HeaderAIIcon"
+                  Margin="0,0,8,0"
+                  FontFamily="Segoe MDL2 Assets"
+                  FontSize="12"
+                  Glyph="&#xE946;"
+                  Visibility="{x:Bind TabStatus.IsAIActive, Mode=OneWay}" />
         <TextBlock x:Name="HeaderTextBlock"
                    Text="{x:Bind Title, Mode=OneWay}"
                    Visibility="Visible" />

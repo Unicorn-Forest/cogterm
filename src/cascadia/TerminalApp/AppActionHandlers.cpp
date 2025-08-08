@@ -1618,4 +1618,48 @@ namespace winrt::TerminalApp::implementation
             args.Handled(handled);
         }
     }
+
+    void TerminalPage::_HandleNewAIChatTab(const IInspectable& /*sender*/,
+                                           const ActionEventArgs& args)
+    {
+        if (args == nullptr)
+        {
+            // Create default AI chat tab
+            LOG_IF_FAILED(_OpenNewAIChatTab(nullptr));
+            args.Handled(true);
+        }
+        else if (const auto& realArgs = args.ActionArgs().try_as<NewTabArgs>())
+        {
+            if (_shouldBailForInvalidProfileIndex(_settings, realArgs.ContentArgs()))
+            {
+                args.Handled(false);
+                return;
+            }
+
+            LOG_IF_FAILED(_OpenNewAIChatTab(realArgs.ContentArgs()));
+            args.Handled(true);
+        }
+    }
+
+    void TerminalPage::_HandleNewAIAgentTab(const IInspectable& /*sender*/,
+                                            const ActionEventArgs& args)
+    {
+        if (args == nullptr)
+        {
+            // Create default AI agent tab
+            LOG_IF_FAILED(_OpenNewAIAgentTab(nullptr));
+            args.Handled(true);
+        }
+        else if (const auto& realArgs = args.ActionArgs().try_as<NewTabArgs>())
+        {
+            if (_shouldBailForInvalidProfileIndex(_settings, realArgs.ContentArgs()))
+            {
+                args.Handled(false);
+                return;
+            }
+
+            LOG_IF_FAILED(_OpenNewAIAgentTab(realArgs.ContentArgs()));
+            args.Handled(true);
+        }
+    }
 }

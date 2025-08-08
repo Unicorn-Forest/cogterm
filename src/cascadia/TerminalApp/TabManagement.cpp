@@ -20,6 +20,7 @@
 #include "TabRowControl.h"
 #include "DebugTapConnection.h"
 #include "..\TerminalSettingsModel\FileUtils.h"
+#include "..\TerminalConnection\AIChatConnection.h"
 
 #include <shlobj.h>
 
@@ -89,6 +90,88 @@ namespace winrt::TerminalApp::implementation
         // This call to _MakePane won't return nullptr, we already checked that
         // case above with the _maybeElevate call.
         _CreateNewTabFromPane(_MakePane(newContentArgs, nullptr));
+        return S_OK;
+    }
+    CATCH_RETURN();
+
+    HRESULT TerminalPage::_OpenNewAIChatTab(const INewContentArgs& newContentArgs)
+    try
+    {
+        auto newTerminalArgs = newContentArgs.try_as<NewTerminalArgs>();
+        if (!newTerminalArgs)
+        {
+            // Create default terminal args for AI Chat
+            newTerminalArgs = NewTerminalArgs{};
+        }
+
+        // Create an AI Chat connection
+        auto aichatConnection = winrt::Microsoft::Terminal::TerminalConnection::AIChatConnection();
+        
+        // Set AI Chat properties
+        aichatConnection.Role(L"assistant");
+        aichatConnection.Provider(L"default"); // TODO: Get from settings
+        aichatConnection.Model(L"gpt-3.5-turbo"); // TODO: Get from settings
+
+        const auto profile = _settings.GetProfileForArgs(newTerminalArgs);
+        if (!profile)
+        {
+            return S_FALSE;
+        }
+
+        // Create the pane with the AI connection
+        auto aichatPane = _MakePane(newTerminalArgs, nullptr, aichatConnection);
+        if (aichatPane)
+        {
+            _CreateNewTabFromPane(aichatPane);
+            
+            // Set AI indicator on the tab
+            if (auto currentTab = _GetFocusedTabImpl())
+            {
+                currentTab->GetTabStatus().IsAIActive(true);
+            }
+        }
+
+        return S_OK;
+    }
+    CATCH_RETURN();
+
+    HRESULT TerminalPage::_OpenNewAIAgentTab(const INewContentArgs& newContentArgs)
+    try
+    {
+        auto newTerminalArgs = newContentArgs.try_as<NewTerminalArgs>();
+        if (!newTerminalArgs)
+        {
+            // Create default terminal args for AI Agent
+            newTerminalArgs = NewTerminalArgs{};
+        }
+
+        // Create an AI Agent connection - similar to chat but with different role
+        auto aiagentConnection = winrt::Microsoft::Terminal::TerminalConnection::AIChatConnection();
+        
+        // Set AI Agent properties - agents have different behavior than chat
+        aiagentConnection.Role(L"agent");
+        aiagentConnection.Provider(L"default"); // TODO: Get from settings
+        aiagentConnection.Model(L"gpt-4"); // TODO: Get from settings, agents might need more capable models
+
+        const auto profile = _settings.GetProfileForArgs(newTerminalArgs);
+        if (!profile)
+        {
+            return S_FALSE;
+        }
+
+        // Create the pane with the AI connection
+        auto aiagentPane = _MakePane(newTerminalArgs, nullptr, aiagentConnection);
+        if (aiagentPane)
+        {
+            _CreateNewTabFromPane(aiagentPane);
+            
+            // Set AI indicator on the tab
+            if (auto currentTab = _GetFocusedTabImpl())
+            {
+                currentTab->GetTabStatus().IsAIActive(true);
+            }
+        }
+
         return S_OK;
     }
     CATCH_RETURN();

@@ -251,6 +251,13 @@
                                   Glyph="&#xEC05;"
                                   Visibility="{x:Bind Item.(local:TabPaletteItem.TabStatus).IsInputBroadcastActive, Mode=OneWay}" />
 
+                        <FontIcon x:Name="HeaderAIIcon"
+                                  Margin="0,0,8,0"
+                                  FontFamily="Segoe MDL2 Assets"
+                                  FontSize="12"
+                                  Glyph="&#xE946;"
+                                  Visibility="{x:Bind Item.(local:TabPaletteItem.TabStatus).IsAIActive, Mode=OneWay}" />
+
                     </StackPanel>
 
                     <Ellipse Grid.Column="4"

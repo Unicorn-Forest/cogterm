@@ -1,0 +1,134 @@
+<!--
+    Copyright (c) Microsoft Corporation. All rights reserved. Licensed under
+    the MIT License. See LICENSE in the project root for license information.
+-->
+<Page x:Class="TerminalSettingsEditor.AISettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="using:TerminalSettingsEditor"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:mtu="using:Microsoft.Terminal.UI"
+      xmlns:mux="using:Microsoft.UI.Xaml.Controls"
+      mc:Ignorable="d">
+
+    <ScrollViewer ViewChanging="ViewChanging">
+        <StackPanel Margin="{StaticResource StandardControlMargin}"
+                    Spacing="{StaticResource StandardControlSpacing}">
+            
+            <TextBlock x:Uid="AISettings_HeaderText"
+                       Style="{StaticResource SubtitleTextBlockStyle}"
+                       Text="AI Configuration" />
+            
+            <mux:Expander x:Uid="AISettings_GeneralExpander"
+                          Header="General"
+                          IsExpanded="True">
+                <StackPanel Spacing="{StaticResource StandardControlSpacing}">
+                    
+                    <local:SettingContainer x:Uid="AISettings_EnableAIChat">
+                        <local:SettingContainer.Header>
+                            <mtu:DisplayNamedElement x:Uid="AISettings_EnableAIChatHeader"
+                                                     DisplayName="Enable AI Chat" />
+                        </local:SettingContainer.Header>
+                        <ToggleSwitch x:Name="EnableAIChatToggle"
+                                      AutomationProperties.Name="{Binding Header.DisplayName, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                      IsOn="{x:Bind AISettings.EnableAIChat, Mode=TwoWay}" />
+                    </local:SettingContainer>
+
+                    <local:SettingContainer x:Uid="AISettings_EnableFunctionCalling">
+                        <local:SettingContainer.Header>
+                            <mtu:DisplayNamedElement x:Uid="AISettings_EnableFunctionCallingHeader"
+                                                     DisplayName="Enable Function Calling" />
+                        </local:SettingContainer.Header>
+                        <ToggleSwitch x:Name="EnableFunctionCallingToggle"
+                                      AutomationProperties.Name="{Binding Header.DisplayName, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                      IsOn="{x:Bind AISettings.EnableFunctionCalling, Mode=TwoWay}" />
+                    </local:SettingContainer>
+
+                    <local:SettingContainer x:Uid="AISettings_EnableAutoCompletion">
+                        <local:SettingContainer.Header>
+                            <mtu:DisplayNamedElement x:Uid="AISettings_EnableAutoCompletionHeader"
+                                                     DisplayName="Enable Auto Completion" />
+                        </local:SettingContainer.Header>
+                        <ToggleSwitch x:Name="EnableAutoCompletionToggle"
+                                      AutomationProperties.Name="{Binding Header.DisplayName, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                      IsOn="{x:Bind AISettings.EnableAutoCompletion, Mode=TwoWay}" />
+                    </local:SettingContainer>
+
+                </StackPanel>
+            </mux:Expander>
+
+            <mux:Expander x:Uid="AISettings_ProviderExpander"
+                          Header="Provider Configuration"
+                          IsExpanded="True">
+                <StackPanel Spacing="{StaticResource StandardControlSpacing}">
+                    
+                    <local:SettingContainer x:Uid="AISettings_AIProvider">
+                        <local:SettingContainer.Header>
+                            <mtu:DisplayNamedElement x:Uid="AISettings_AIProviderHeader"
+                                                     DisplayName="AI Provider" />
+                        </local:SettingContainer.Header>
+                        <TextBox x:Name="AIProviderTextBox"
+                                 AutomationProperties.Name="{Binding Header.DisplayName, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                 PlaceholderText="e.g., OpenAI, Azure OpenAI"
+                                 Text="{x:Bind AISettings.AIProvider, Mode=TwoWay}" />
+                    </local:SettingContainer>
+
+                    <local:SettingContainer x:Uid="AISettings_APIKey">
+                        <local:SettingContainer.Header>
+                            <mtu:DisplayNamedElement x:Uid="AISettings_APIKeyHeader"
+                                                     DisplayName="API Key" />
+                        </local:SettingContainer.Header>
+                        <PasswordBox x:Name="APIKeyPasswordBox"
+                                     AutomationProperties.Name="{Binding Header.DisplayName, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                     Password="{x:Bind AISettings.APIKey, Mode=TwoWay}"
+                                     PlaceholderText="Enter your API key" />
+                    </local:SettingContainer>
+
+                    <local:SettingContainer x:Uid="AISettings_DefaultModel">
+                        <local:SettingContainer.Header>
+                            <mtu:DisplayNamedElement x:Uid="AISettings_DefaultModelHeader"
+                                                     DisplayName="Default Model" />
+                        </local:SettingContainer.Header>
+                        <TextBox x:Name="DefaultModelTextBox"
+                                 AutomationProperties.Name="{Binding Header.DisplayName, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                 PlaceholderText="e.g., gpt-3.5-turbo, gpt-4"
+                                 Text="{x:Bind AISettings.DefaultModel, Mode=TwoWay}" />
+                    </local:SettingContainer>
+
+                </StackPanel>
+            </mux:Expander>
+
+            <mux:Expander x:Uid="AISettings_DirectoriesExpander"
+                          Header="Directory Configuration"
+                          IsExpanded="False">
+                <StackPanel Spacing="{StaticResource StandardControlSpacing}">
+                    
+                    <local:SettingContainer x:Uid="AISettings_FunctionsDirectory">
+                        <local:SettingContainer.Header>
+                            <mtu:DisplayNamedElement x:Uid="AISettings_FunctionsDirectoryHeader"
+                                                     DisplayName="Functions Directory" />
+                        </local:SettingContainer.Header>
+                        <TextBox x:Name="FunctionsDirectoryTextBox"
+                                 AutomationProperties.Name="{Binding Header.DisplayName, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                 PlaceholderText="%USERPROFILE%\.terminal\functions"
+                                 Text="{x:Bind AISettings.FunctionsDirectory, Mode=TwoWay}" />
+                    </local:SettingContainer>
+
+                    <local:SettingContainer x:Uid="AISettings_AgentsDirectory">
+                        <local:SettingContainer.Header>
+                            <mtu:DisplayNamedElement x:Uid="AISettings_AgentsDirectoryHeader"
+                                                     DisplayName="Agents Directory" />
+                        </local:SettingContainer.Header>
+                        <TextBox x:Name="AgentsDirectoryTextBox"
+                                 AutomationProperties.Name="{Binding Header.DisplayName, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                 PlaceholderText="%USERPROFILE%\.terminal\agents"
+                                 Text="{x:Bind AISettings.AgentsDirectory, Mode=TwoWay}" />
+                    </local:SettingContainer>
+
+                </StackPanel>
+            </mux:Expander>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
